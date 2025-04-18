@@ -25,10 +25,20 @@ from lcr import configure_lcr, fetch_measurement
 class ImpedanceMeasurementApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("ZScan - Impedance Measurement App v1.0.0")
+        self.root.title("Impedance Measurement App")
         self.root.geometry("500x600")
         self.root.resizable(False, False)
+
         self.root.option_add("*Font", "Fixedsys 14")
+
+        # Center the window on the screen
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        window_width = 500
+        window_height = 600
+        position_top = int((screen_height / 2) - (window_height / 2))
+        position_right = int((screen_width / 2) - (window_width / 2))
+        self.root.geometry(f'{window_width}x{window_height}+{position_right}+{position_top}')
 
         self.lcr = MockLCRMeter()
         self.measurements = []
@@ -38,26 +48,15 @@ class ImpedanceMeasurementApp:
         style.configure("TButton", padding=6, relief="flat", font=("Fixedsys", 14), borderwidth=2, foreground="black")
         style.map("TButton", background=[('active', '#1E90FF')])
 
-        # Header frame
-        self.header_frame = tk.Frame(self.root)
-        self.header_frame.pack(pady=(10, 10))
-        self.header_label = tk.Label(self.header_frame, text="ZScan - v1.0.0", font=("Fixedsys", 20, "bold"), fg="blue")
-        self.header_label.pack()
-
-        # Controls frame
-        self.controls_frame = tk.Frame(self.root)
-        self.controls_frame.pack(pady=10)
-
-        self.dropdown_label = tk.Label(self.controls_frame, text="Select Measurement:", font=("Fixedsys", 14))
+        self.dropdown_label = tk.Label(self.root, text="Select Measurement:", font=("Fixedsys", 14))
         self.dropdown_label.pack(pady=(10, 0))
 
         self.measurement_choice = tk.StringVar()
-        self.measurement_dropdown = ttk.Combobox(self.controls_frame, textvariable=self.measurement_choice, state="readonly",
+        self.measurement_dropdown = ttk.Combobox(self.root, textvariable=self.measurement_choice, state="readonly",
                                                   values=["1", "2", "3"])
         self.measurement_dropdown.pack(pady=5)
         self.measurement_dropdown.current(0)
 
-        # Button frame
         self.button_frame = tk.Frame(self.root)
         self.button_frame.pack(pady=20)
 
@@ -80,19 +79,14 @@ class ImpedanceMeasurementApp:
         self.exit_button = ttk.Button(self.button_frame, text="Exit", command=self.exit_app)
         self.exit_button.pack(pady=5)
 
-        # Progress bar
         self.progress = ttk.Progressbar(self.root, orient="horizontal", length=400, mode="determinate")
         self.progress.pack(pady=10)
 
-        # Status frame
-        self.status_frame = tk.Frame(self.root)
-        self.status_frame.pack(side=tk.BOTTOM, fill=tk.X)
-
         self.status_var = tk.StringVar()
         self.status_var.set("STATUS: IDLE")
-        self.status_bar = tk.Label(self.status_frame, textvariable=self.status_var, bd=1, relief=tk.SUNKEN, anchor='center', 
+        self.status_bar = tk.Label(self.root, textvariable=self.status_var, bd=1, relief=tk.SUNKEN, anchor='center', 
                                    font=("Fixedsys", 14, "bold"), fg="black")
-        self.status_bar.pack(fill=tk.X)
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def start_measurement_thread(self):
         thread = Thread(target=self.measure_impedance)
