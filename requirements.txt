@@ -1,0 +1,6 @@
+pyvisa
+nidaqmx
+gspread
+oauth2client
+matplotlib
+numpy
