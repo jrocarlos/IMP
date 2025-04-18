@@ -29,36 +29,41 @@ class ImpedanceMeasurementApp:
         self.root.geometry("500x650")
         self.root.resizable(False, False)
         self.root.option_add("*Font", "Fixedsys 14")
+        self.root.configure(bg="#1e1e1e")
 
         self.lcr = MockLCRMeter()
         self.measurements = []
         self.stop_event = Event()
 
         style = ttk.Style()
-        style.configure("TButton", padding=6, relief="flat", font=("Fixedsys", 14), borderwidth=2, foreground="black")
-        style.map("TButton", background=[('active', '#1E90FF')])
+        style.theme_use("clam")
+        style.configure("TButton", padding=6, relief="flat", font=("Fixedsys", 14), borderwidth=2,
+                        foreground="white", background="#333", focuscolor="#555")
+        style.map("TButton", background=[('active', '#444')], foreground=[('active', 'red')])
+        style.configure("TCombobox", fieldbackground="#333", background="#333", foreground="white")
+        style.map("TCombobox", fieldbackground=[('readonly', '#333')])
 
         # Header frame
-        self.header_frame = tk.Frame(self.root)
+        self.header_frame = tk.Frame(self.root, bg="#1e1e1e")
         self.header_frame.pack(pady=(10, 10))
-        self.header_label = tk.Label(self.header_frame, text="ZScan - v1.0.0", font=("Fixedsys", 20, "bold"), fg="blue")
+        self.header_label = tk.Label(self.header_frame, text="ZScan - v1.0.0", font=("Fixedsys", 20, "bold"), fg="cyan", bg="#1e1e1e")
         self.header_label.pack()
 
         # Controls frame
-        self.controls_frame = tk.Frame(self.root)
+        self.controls_frame = tk.Frame(self.root, bg="#1e1e1e")
         self.controls_frame.pack(pady=10)
 
-        self.dropdown_label = tk.Label(self.controls_frame, text="Select Measurement:", font=("Fixedsys", 14))
+        self.dropdown_label = tk.Label(self.controls_frame, text="Select Measurement:", font=("Fixedsys", 14), fg="white", bg="#1e1e1e")
         self.dropdown_label.pack(pady=(10, 0))
 
         self.measurement_choice = tk.StringVar()
         self.measurement_dropdown = ttk.Combobox(self.controls_frame, textvariable=self.measurement_choice, state="readonly",
-                                                  values=["PINS", "HOUSING", "ISLAND", "HOUSING STRIP"],justify="center")
+                                                  values=["PARAMETER","PINS", "HOUSING", "ISLAND", "HOUSING STRIP"], justify="center")
         self.measurement_dropdown.pack(pady=5)
         self.measurement_dropdown.current(0)
 
         # Button frame
-        self.button_frame = tk.Frame(self.root)
+        self.button_frame = tk.Frame(self.root, bg="#1e1e1e")
         self.button_frame.pack(pady=20)
 
         self.measure_button = ttk.Button(self.button_frame, text="Measure", command=self.start_measurement_thread)
@@ -88,13 +93,13 @@ class ImpedanceMeasurementApp:
         self.progress.pack(pady=10)
 
         # Status frame
-        self.status_frame = tk.Frame(self.root)
+        self.status_frame = tk.Frame(self.root, bg="#1e1e1e")
         self.status_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
         self.status_var = tk.StringVar()
         self.status_var.set("STATUS: IDLE")
         self.status_bar = tk.Label(self.status_frame, textvariable=self.status_var, bd=1, relief=tk.SUNKEN, anchor='center', 
-                                   font=("Fixedsys", 14, "bold"), fg="black")
+                                   font=("Fixedsys", 14, "bold"), fg="white", bg="#1e1e1e")
         self.status_bar.pack(fill=tk.X)
 
     def start_measurement_thread(self):
@@ -102,8 +107,8 @@ class ImpedanceMeasurementApp:
         thread.start()
 
     def measure_impedance(self):
-        if len(self.measurements) >= 4:
-            messagebox.showinfo("Info", "Maximum of three measurements allowed.")
+        if len(self.measurements) >= 5:
+            messagebox.showinfo("Info", "Maximum of five measurements allowed.")
             return
 
         self.stop_event.clear()
@@ -173,7 +178,7 @@ class ImpedanceMeasurementApp:
         plt.figure(figsize=(10, 6))
 
         for freqs, mags, label in self.measurements:
-            plt.semilogx(freqs, mags, label=f"{label}")
+            plt.semilogx(freqs, mags, label=f"Measurement {label}")
 
         plt.title("Impedance vs Frequency")
         plt.xlabel("Frequency (Hz)")
@@ -190,7 +195,7 @@ class ImpedanceMeasurementApp:
 
         plt.figure(figsize=(10, 6))
         for f, m, label in self.measurements:
-            plt.semilogx(f, m, label=f"{label}")
+            plt.semilogx(f, m, label=f"Measurement {label}")
 
         plt.title("Impedance vs Frequency")
         plt.xlabel("Frequency (Hz)")
@@ -212,7 +217,7 @@ class ImpedanceMeasurementApp:
 
         with open(file_path, "w") as f:
             for freqs, mags, label in self.measurements:
-                f.write(f"{label}\n")
+                f.write(f"Measurement {label}\n")
                 for freq, mag in zip(freqs, mags):
                     f.write(f"{freq}\t{mag:.4f}\n")
                 f.write("\n")
